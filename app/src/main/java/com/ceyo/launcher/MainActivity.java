@@ -17,7 +17,9 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.view.MotionEvent;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -44,6 +46,8 @@ public class MainActivity extends Activity {
     private final List<AppItem> shown = new ArrayList<>();
     private AppAdapter adapter;
     private EditText search;
+    private FrameLayout panelHost;
+    private float swipeY0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +58,13 @@ public class MainActivity extends Activity {
         root.setBackgroundColor(Color.parseColor("#66000000"));
         root.setFitsSystemWindows(true);
         root.setPadding(dp(12), dp(8), dp(12), dp(8));
+
+        LinearLayout bar = new LinearLayout(this);
+        bar.setGravity(Gravity.END);
+        bar.addView(barButton("▾ Panel", v -> openPanel()));
+        bar.addView(barButton("⚙", v -> startActivity(new Intent(this, SettingsActivity.class))));
+        root.addView(bar, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         TextClock clock = new TextClock(this);
         clock.setFormat24Hour("HH:mm");
@@ -100,7 +111,25 @@ public class MainActivity extends Activity {
         root.addView(grid, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
-        setContentView(root);
+        View.OnTouchListener swipeDown = (v, e) -> {
+            int a = e.getActionMasked();
+            if (a == MotionEvent.ACTION_DOWN) {
+                swipeY0 = e.getRawY();
+            } else if (a == MotionEvent.ACTION_MOVE && e.getRawY() - swipeY0 > dp(48)) {
+                swipeY0 = Float.MAX_VALUE;
+                openPanel();
+            }
+            return true;
+        };
+        clock.setOnTouchListener(swipeDown);
+        date.setOnTouchListener(swipeDown);
+
+        FrameLayout frame = new FrameLayout(this);
+        frame.addView(root, new FrameLayout.LayoutParams(-1, -1));
+        panelHost = new FrameLayout(this);
+        panelHost.setVisibility(View.GONE);
+        frame.addView(panelHost, new FrameLayout.LayoutParams(-1, -1));
+        setContentView(frame);
 
         search.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
@@ -121,6 +150,7 @@ public class MainActivity extends Activity {
         super.onNewIntent(intent);
         // Ana ekran tuşuna basılınca aramayı temizle
         if (Intent.ACTION_MAIN.equals(intent.getAction())) {
+            closePanel();
             search.setText("");
             search.clearFocus();
             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -130,7 +160,32 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        // Launcher'dan geri tuşuyla çıkılmaz
+        // Launcher'dan geri tuşuyla çıkılmaz; panel açıksa kapanır
+        if (panelHost != null && panelHost.getVisibility() == View.VISIBLE) closePanel();
+    }
+
+    private TextView barButton(String t, View.OnClickListener l) {
+        TextView v = new TextView(this);
+        v.setText(t);
+        v.setTextColor(Color.WHITE);
+        v.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        v.setPadding(dp(12), dp(6), dp(12), dp(6));
+        v.setOnClickListener(l);
+        return v;
+    }
+
+    private void openPanel() {
+        if (panelHost.getVisibility() == View.VISIBLE) return;
+        panelHost.removeAllViews();
+        PanelHost ph = new PanelHost(this, this::closePanel);
+        panelHost.addView(ph, new FrameLayout.LayoutParams(-1, -1));
+        panelHost.setVisibility(View.VISIBLE);
+        ph.requestFocus();
+    }
+
+    private void closePanel() {
+        panelHost.setVisibility(View.GONE);
+        panelHost.removeAllViews();
     }
 
     private void loadApps() {
