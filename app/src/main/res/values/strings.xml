@@ -1,4 +1,3 @@
 <resources>
     <string name="app_name">Ceyo Launcher</string>
-    <string name="shade_desc">Sistemin bildirim ve hızlı ayarlar çubuğu açıldığında yerine Ceyo Launcher paneli gösterilir ve ekran görüntüsü düğmesi çalışır. Ekrandaki hiçbir içerik okunmaz.</string>
 </resources>

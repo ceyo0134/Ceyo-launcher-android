@@ -1,6 +1,5 @@
 package com.ceyo.launcher;
 
-import android.accessibilityservice.AccessibilityService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -42,9 +41,9 @@ public class PanelView extends Card {
     private boolean torchOn;
     private CameraManager.TorchCallback torchCb;
 
-    private static final String[] TILE_GLYPH = {"🔦", "✈", "☀", "🔕", "📡", "✂", "⟳", "📍"};
+    private static final String[] TILE_GLYPH = {"🔦", "✈", "☀", "🔕", "📡", "⚙", "⟳", "📍"};
     private static final String[] TILE_LABEL = {"Flaş ışığı", "Uçak Modu", "Uyarlanabilir Parlaklık",
-            "Sessiz", "Erişim Noktası", "Ekran görüntüsü", "Otomatik döndür", "Konum"};
+            "Sessiz", "Erişim Noktası", "Ayarlar", "Otomatik döndür", "Konum"};
 
     public PanelView(Context c, Runnable close) {
         super(c, 0);
@@ -368,7 +367,7 @@ public class PanelView extends Card {
                     }
                     return;
                 case 5:
-                    screenshot();
+                    open(new Intent(Settings.ACTION_SETTINGS));
                     return;
                 case 6:
                     if (needWrite()) return;
@@ -382,17 +381,6 @@ public class PanelView extends Card {
             toast("İşlem yapılamadı");
         }
         refresh();
-    }
-
-    private void screenshot() {
-        final ShadeService svc = ShadeService.instance;
-        if (svc == null || Build.VERSION.SDK_INT < 28) {
-            toast("Önce ayarlardan erişilebilirlik hizmetini aç");
-            return;
-        }
-        close.run();
-        new Handler(Looper.getMainLooper()).postDelayed(
-                () -> svc.performGlobalAction(AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT), 500);
     }
 
     // ---------- yaşam döngüsü ----------

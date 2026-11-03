@@ -27,7 +27,6 @@ public class SettingsActivity extends Activity {
             0xFFFFFFFF, 0xB3000000};
 
     private PanelView preview;
-    private TextView status;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -78,28 +77,12 @@ public class SettingsActivity extends Activity {
             col.addView(btns);
         }
 
-        col.addView(label("Sistem paneli", 17, Color.WHITE), margin(26));
-        status = label("", 13, 0xCCFFFFFF);
-        col.addView(status);
-        col.addView(button("1) Erişilebilirlik hizmetini aç (Ceyo Launcher)",
-                v -> startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))));
-        col.addView(button("2) Ayarları değiştirme izni (parlaklık, döndürme)",
+        col.addView(label("İzinler", 17, Color.WHITE), margin(26));
+        col.addView(button("1) Ayarları değiştirme izni (parlaklık, döndürme)",
                 v -> startActivity(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
                         Uri.parse("package:" + getPackageName())))));
-        col.addView(button("3) Varsayılan ana ekranı seç",
+        col.addView(button("2) Varsayılan ana ekranı seç",
                 v -> startActivity(new Intent(Settings.ACTION_HOME_SETTINGS))));
-        final Button toggle = button("", null);
-        toggle.setOnClickListener(v -> {
-            Prefs.setShadeEnabled(this, !Prefs.shadeEnabled(this));
-            refreshStatus(toggle);
-        });
-        col.addView(toggle);
-        refreshStatus(toggle);
-
-        col.addView(label("Tanılama (son görülen sistem pencereleri)", 13, 0x99FFFFFF), margin(18));
-        TextView diagView = label("", 12, 0x99FFFFFF);
-        diagView.setTag("diag");
-        col.addView(diagView);
     }
 
     @Override
@@ -109,18 +92,6 @@ public class SettingsActivity extends Activity {
             preview.applyTheme();
             preview.refresh();
         }
-        View root = findViewById(android.R.id.content);
-        TextView d = (TextView) root.findViewWithTag("diag");
-        if (d != null) d.setText(Prefs.diag(this).isEmpty() ? "(henüz yok)" : Prefs.diag(this));
-        if (status != null) {
-            status.setText(ShadeService.instance != null
-                    ? "Erişilebilirlik hizmeti: AÇIK" : "Erişilebilirlik hizmeti: KAPALI");
-        }
-    }
-
-    private void refreshStatus(Button toggle) {
-        toggle.setText("Sistem çubuğunun yerine bu paneli göster: "
-                + (Prefs.shadeEnabled(this) ? "AÇIK" : "KAPALI"));
     }
 
     private void pick(int idx) {

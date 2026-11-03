@@ -52,24 +52,4 @@ public final class Prefs {
         sp(c).edit().remove("color" + i).putBoolean("img" + i, false).apply();
     }
 
-    public static boolean shadeEnabled(Context c) {
-        return sp(c).getBoolean("shade", true);
-    }
-
-    public static void setShadeEnabled(Context c, boolean v) {
-        sp(c).edit().putBoolean("shade", v).apply();
-    }
-
-    public static void logWindow(Context c, String name) {
-        String old = sp(c).getString("diag", "");
-        if (old.startsWith(name + "\n")) return;
-        String[] lines = (name + "\n" + old).split("\n");
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < Math.min(lines.length, 12); i++) sb.append(lines[i]).append("\n");
-        sp(c).edit().putString("diag", sb.toString()).apply();
-    }
-
-    public static String diag(Context c) {
-        return sp(c).getString("diag", "");
-    }
 }
