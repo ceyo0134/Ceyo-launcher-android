@@ -97,7 +97,9 @@ public class SettingsActivity extends Activity {
         refreshStatus(toggle);
 
         col.addView(label("Tanılama (son görülen sistem pencereleri)", 13, 0x99FFFFFF), margin(18));
-        col.addView(label("", 12, 0x99FFFFFF)).setTag("diag");
+        TextView diagView = label("", 12, 0x99FFFFFF);
+        diagView.setTag("diag");
+        col.addView(diagView);
     }
 
     @Override
